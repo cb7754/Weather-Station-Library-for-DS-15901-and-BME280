@@ -1,0 +1,380 @@
+<html>
+	<head>
+		<!-- Compressed JavaScript Library  and Themes-->
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+	  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>  
+	</head>
+	
+	<body lang=EN-US style='tab-interval:36.0pt;word-wrap:break-word'>
+
+		<script>
+			// log function
+      log = function(data){
+        document.getElementById("msg").innerHTML=data;
+      };
+			
+			var Msg = [];
+			$(document).ready(function () {
+        //$("div#message_details").hide()
+ 
+        var ws;
+ 			$("#close").click(function(evt){
+				btnopen.removeAttr("disabled"); // enable button
+				if( typeof ws != "undefined"){
+					if(ws.readyState != 3 && ws.readyState != 4 ){
+						ws.send("Close");
+						ws.close();
+					}
+				}						
+				});
+ 					
+			$("#open").click(function(evt) {
+				evt.preventDefault();
+				
+				var host = $("#host").val();
+				var port = $("#port").val();
+				var uri = $("#uri").val();
+				btnopen = $(evt.target);
+				btnopen.attr("disabled", "disabled"); // disable button
+				
+				// create websocket instance
+				ws = new WebSocket("ws://" + host + ":" + port + uri);
+				 
+				// Handle incoming websocket message callback
+	      //                        0     1    2   3     4     5     6    7   8    9
+	      //receive Msg Format="MSGOK,Speed,Gust,Dir,ARain,LRain,SRain,Temp,Hum,Pres"
+	      ws.onmessage = function(evt){
+	      	str = evt.data;
+	      	Msg = str.split(",")
+					if(Msg[0] == "MSGOK") {	      	
+						document.getElementById("speed").innerHTML =  Msg[1];
+						document.getElementById("gust").innerHTML =  Msg[2];
+	      		document.getElementById("direction").innerHTML = Msg[3];
+						document.getElementById("ARain").innerHTML = Msg[4];
+						document.getElementById("LRain").innerHTML = Msg[5];
+						document.getElementById("SRain").innerHTML = Msg[6];
+						number = NumberFormat(Msg[7],1 ,false);
+						document.getElementById("tempCI").innerHTML = intStr(number);
+						document.getElementById("tempCD").innerHTML = decimalStr(number,1);
+						document.getElementById("hum").innerHTML =  Msg[8];
+						number = NumberFormat(Msg[9],1 ,false);
+						document.getElementById("pressI").innerHTML = intStr(number);
+						document.getElementById("pressD").innerHTML = decimalStr(number,1);
+					}
+				};
+				
+		    // Close Websocket callback
+	      ws.onclose = function(evt) {
+	        log("***Connection Closed***");
+	        //alert("Connection close");
+	        $("#host").css("background", "#ff0000"); 
+	        $("#port").css("background", "#ff0000"); 
+	        $("#uri").css("background",  "#ff0000");
+	        $("div#message_details").hide();
+	
+	        };
+	
+	      // Open Websocket callback
+	      ws.onopen = function(evt) { 
+	        $("#host").css("background", "#00ff00"); 
+	        $("#port").css("background", "#00ff00"); 
+	        $("#uri").css("background", "#00ff00");
+	        $("div#message_details").show();
+	        //$("div#message_details").show();
+					ws.send("Open");
+	        log("***Connection Opened***");
+	        btnopen.removeAttr("disabled"); // enable button
+	      };
+	    });
+
+	  });
+	      
+		
+		</script>
+		
+		<script>
+			function decimalStr(number, decimal) {
+				var n = parseFloat(number);
+				n = n - parseInt(n);
+				n = n * Math.pow(10, decimal) + 0.5;
+				str = "." + parseInt(n).toString();
+				return str;
+			}
+			
+			function intStr(number){
+				return parseInt(number).toString();
+			}
+			
+			function NumberFormat(number, decimal, comma) {
+				var i = parseFloat(number)
+				if (isNaN(i)) { i = 0.00; }
+				var minus = '';
+			
+				if (i < 0) { minus = '-'; }
+				i = Math.abs(i)
+				i = i + 0.5 / Math.pow(10, decimal)
+				i = parseInt(i * Math.pow(10, decimal))
+				i = i / Math.pow(10, decimal)
+				s = new String(i)
+			
+				if (s.indexOf('.') < 0) 
+					if (decimal > 0)
+						s += '.'
+			
+				for (i = s.length; i <= s.indexOf('.') + decimal ; i++)
+					s += '0'
+			
+				s = minus + s
+				var str = s
+			
+				if (comma) {
+					str = addComma(s)
+				}
+			
+				return str
+		}
+		
+		function addComma(s) {
+			var revr = ''
+			var i = 0
+			var addcomma = false
+			var count = 0
+			s.length
+			for (i = s.length - 1; i >= 0; i--) {
+				if (addcomma)
+					if (count == 3) {
+						revr = revr + ','
+						count = 0
+					} else
+						count++
+		
+				if (s.substr(i, 1) == '.')
+					addcomma = true
+				revr = revr + s.substr(i, 1)
+			}
+			return reverseString(revr)
+		}
+		
+		function reverseString(str) {
+			var i = 0
+			var s = ''
+			for (i = str.length; i >= 0; i--)
+				s = s + str.substr(i, 1)
+			return s
+		}
+		
+	
+		</script>
+	
+		<div class=WordSection1>
+			<p style='font-size:30.0pt;font-family:"Verdana"'>Weather Station V1.0</p>
+		    
+  	<table border=0 cellspacing=0 cellpadding=0
+  		<tr>
+			  <td valign=top style='width:200pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Wind Direction</p>
+			  </td> 
+			  <td align="right" valign=top halign=right style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' text-align: right id="direction">ESE</label>
+		  	</td>
+		  </tr>	
+		  
+		  <tr>
+		  	<td valign=top style='width:200pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Wind Speed</p>
+			  </td> 
+			 
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' text-align: right id="speed">15</label>
+		  	</td>
+ 				
+ 				<td valign=top style='width:40pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  	</td>
+		  	
+ 				<td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>km/h</p>
+		  	</td>
+		  </tr>
+
+
+		  <tr>
+		  	<td valign=top style='width:100pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Wind Gust</p>
+			  </td> 
+			  
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' text-align: right id="gust">25</label>
+		  	</td>
+		  	
+ 				<td valign=top style='width:40pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  	</td>
+
+		   	<td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>km/h</p>
+		  	</td>
+			</tr>		  	
+
+
+		  <tr>
+		  	<td valign=top style='width:200'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Actual Rain</p>
+			  </td> 
+
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="ARain">115</label>
+
+ 				<td valign=top style='width:40pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  	</td>
+
+			  <td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>mm</p>
+		  	</td>
+			</tr>
+			
+			
+			<tr>
+		  	<td valign=top style='width:100pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Last Rain</p>
+			  </td> 
+
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="LRain">125</label>
+
+ 				<td valign=top style='width:40pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  	</td>
+
+			  <td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>mm</p>
+		  	</td>
+			</tr>
+			
+			
+			<tr>
+		  	<td valign=top style='width:125pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Acummulated Rain</p>
+			  </td> 
+
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="SRain">315</label>
+		  	</td>
+
+ 				<td valign=top style='width:40pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  	</td>
+
+			  <td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>mm</p>
+		  	</td>
+			</tr>
+
+
+		  <tr>
+		  	<td valign=top style='width:200pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Temperature</p>
+			  </td> 
+
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="tempCI">15</label>
+		  	</td>
+
+			  <td align="left" valign=bottom style='width:40pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' text-align: left id="tempCD">.9</label>
+		  	</td>
+
+ 				  <td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>&#176;C</p>
+		  	</td>
+			</tr>
+
+
+		<tr>
+			<td valign=top style='width:200pt'>
+			  <p style='font-size:20.0pt;font-family:"Verdana"'>Humidity</p>
+		  </td> 
+
+		  <td align="right" valign=bottom style='width:70pt;margin-right: 10px;'>
+			  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="hum">45</label>
+	   	</td>
+	   	
+	  	<td valign=top style='width:40pt'>
+			  <p style='font-size:20.0pt;font-family:"Verdana"'></p>
+		  </td> 
+			  
+			  <td valign=top style='width:70pt'>
+			  <p style='font-size:20.0pt;font-family:"Verdana"'>% HR</p>
+	  	</td>
+		</tr>		  	
+			
+			<tr>
+				<td valign=top style='width:200pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>Pressure</p>
+			  </td> 
+			  <td align="right" valign=bottom style='width:70pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' id="pressI">1023</label>
+		  	</td>
+			  <td align="left" valign=bottom style='width:40pt'>
+				  <label style='font-size:20.0pt;font-family:"Lucida Console"' text-align: left id="pressD">.33</label>
+		  	</td>
+		  	
+ 				  <td valign=top style='width:70pt'>
+				  <p style='font-size:20.0pt;font-family:"Verdana"'>hPa</p>
+		  	</td>
+
+			</table>
+
+		</div>
+		
+		
+		<style>
+			#connection_details {
+	   		position: relative;
+	   		top:20;
+	   		left:100;
+			}
+			#buttons{
+	   		position: relative;
+	   		top:10;
+	   		left:80;
+			}
+			.input{
+				position: relative;
+				left: 10
+			}
+			form  		{ display: table;      }
+			p#table2  { display: table-row;  }
+			label 		{ display: table-cell; }
+			input 		{ display: table-cell; }	
+		</style>
+		
+    <div id="connection_details">
+	  	<form>
+	  		<p id=table2>
+			  	<label for="Host">host:</label>
+			  	<input type="text" class="input" id="host" value="your_ip" style="background:#ff0000;"/><br />
+		  	</p>
+		  	<p id=table2>
+			  	<label for="Port">port:</label>
+			  	<input type="text" class="input" id="port" value="your_port" style="background:#ff0000;"/><br />
+		  	</p>
+		  	<p id=table2>
+			  	<label for="Uri">uri :  </label>
+		  		<input type="text" class="input" id="uri" value="/ws" style="background:#ff0000;"/><br />
+	  		</p>
+    	</form>
+      <div id=buttons>
+	      <input type="submit" id="open" value="Open" />
+	      <input type="button" id="close" value="Close" />
+	      <br><br>
+	      <label id="msg"></label>
+			</div>
+	  
+    </div>		
+		
+	</body>
+
+</html>
