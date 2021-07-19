@@ -37,3 +37,5 @@ The following method can be used:
   I tried to compile the library with the Adafruit BME280 library and use their functionality inside my library, but when it did it the Arduino hangs. Specifically, it hangs when I 
   call the method .begin(). So, I ended doing this unorthodox way of include the <Adafruit_BME280.h> in my library and the call the begin() method from the main sketch. This is the reason i Had to declare those variables as extern.
   
+  I include two examples: WeatherStationTest.ino, that ilustrate the use of the library and WeatherSattionAndWebsockets.ino that use this library together with websockets server to send the data to a client (WeatherStation.html, also included) in an Arduino MKR100. The last example use the library [WiFiConnect](https://github.com/cb7754/WiFiConnect-Library-for-Arduino-MKR1000) to connect a MKR1000 to wifi.
+  
