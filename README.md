@@ -29,7 +29,7 @@ The following method can be used:
   
   - int accumulatedRain()        = The accumulated rain fell in the accumulated_rain_period in mm.
   - int lastDayRain()            = The rain of the last day in mm. 
-  - String windDirection()       = Wind direction in a string form, i.e.: "NNE".
+  - String windDirection()       = Wind direction in a string form, e.g.: "NNE".
   - int windSpeed()              = Wind speed in Km/h.
   - int windGust()               = Wind gust in Km/h.
   - float temperature()          = Outside temperature in Celsius.
